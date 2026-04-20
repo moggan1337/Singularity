@@ -500,3 +500,611 @@ SINGULARITY builds upon decades of research in:
   
   "The last invention humans will ever need to make"
 </p>
+
+---
+
+## Technical Deep Dive
+
+### AST Manipulation Internals
+
+The Abstract Syntax Tree (AST) is the foundation of SINGULARITY's self-modification capabilities. Understanding how AST manipulation works is crucial for appreciating the system's power.
+
+#### What is an AST?
+
+When JavaScript code is parsed, it's converted into a tree structure where each node represents a syntactic construct:
+
+```javascript
+// Source Code
+const add = (a, b) => a + b;
+
+// Corresponding AST Structure
+{
+  "type": "VariableDeclaration",
+  "declarations": [{
+    "type": "VariableDeclarator",
+    "id": { "type": "Identifier", "name": "add" },
+    "init": {
+      "type": "ArrowFunctionExpression",
+      "params": [
+        { "type": "Identifier", "name": "a" },
+        { "type": "Identifier", "name": "b" }
+      ],
+      "body": {
+        "type": "BinaryExpression",
+        "operator": "+",
+        "left": { "type": "Identifier", "name": "a" },
+        "right": { "type": "Identifier", "name": "b" }
+      }
+    }
+  }],
+  "kind": "const"
+}
+```
+
+#### Transformation Pipeline
+
+1. **Parsing**: Source code → AST using Acorn parser
+2. **Analysis**: AST → Semantic information (types, scopes, control flow)
+3. **Modification**: AST → Modified AST (transformations)
+4. **Generation**: Modified AST → Source code (Escodegen)
+
+### Self-Profiling Architecture
+
+The self-profiler operates as a continuous monitoring system:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   PROFILING PIPELINE                     │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐ │
+│  │   Capture   │───▶│   Store     │───▶│   Analyze   │ │
+│  │   Metrics   │    │   History    │    │   Trends    │ │
+│  └─────────────┘    └─────────────┘    └─────────────┘ │
+│         │                                      │         │
+│         ▼                                      ▼         │
+│  ┌─────────────┐                      ┌─────────────┐ │
+│  │   Identify  │                      │   Generate  │ │
+│  │   Bottlenecks│◀─────────────────▶  │   Reports   │ │
+│  └─────────────┘                      └─────────────┘ │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Metrics Collected
+
+| Metric | Description | Unit |
+|--------|-------------|------|
+| `duration` | Execution time | milliseconds |
+| `memory_delta` | Memory change | bytes |
+| `nodeCount` | AST node count | integer |
+| `complexity` | Cyclomatic complexity | integer |
+
+### Evolutionary Algorithm Design
+
+The evolution engine implements a canonical genetic algorithm:
+
+```
+Population Initialization
+         │
+         ▼
+┌─────────────────────┐
+│   Fitness Eval      │
+│   (parallel)        │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│   Tournament        │
+│   Selection         │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐     ┌─────────────────────┐
+│   Crossover         │────▶│   Mutation          │
+│   (70% rate)        │     │   (10% rate)       │
+└──────────┬──────────┘     └─────────────────────┘
+           │
+           ▼
+┌─────────────────────┐
+│   Survivor          │
+│   Selection         │
+│   (elitism: top 5) │
+└──────────┬──────────┘
+           │
+           ▼
+      Next Generation
+```
+
+#### Gene Representation
+
+```javascript
+// Example gene structure for parameter tuning
+{
+  type: 'parameter-tuning',
+  genes: {
+    learningRate: 0.015,      // Continuous: [0, 0.5]
+    threshold: 0.25,          // Continuous: [0, 1]
+    iterations: 45,           // Discrete: [10, 100]
+    decay: 0.05,              // Continuous: [0, 0.1]
+    momentum: 0.72            // Continuous: [0, 0.9]
+  }
+}
+
+// Example gene structure for algorithm selection
+{
+  type: 'algorithm-replacement',
+  genes: {
+    algorithmType: 'dynamic',   // Enum: ['greedy', 'dynamic', 'heuristic', 'exact']
+    strategy: 'best-first',    // Enum: ['first-best', 'best-first', 'random']
+    lookahead: 3               // Discrete: [1, 5]
+  }
+}
+```
+
+### Safety System Design
+
+The safety monitor implements defense-in-depth:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    SAFETY VALIDATION LAYERS                  │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Layer 1: Structure Validation                              │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ • Null/undefined checks                               │ │
+│  │ • Type validation                                    │ │
+│  │ • Required fields verification                       │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                         │                                   │
+│                         ▼                                   │
+│  Layer 2: Pattern Matching                                 │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ • Forbidden patterns (eval, fs, child_process)         │ │
+│  │ • Required patterns (error handling)                 │ │
+│  │ • Security anti-patterns                             │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                         │                                   │
+│                         ▼                                   │
+│  Layer 3: Resource Limits                                  │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ • Code size limits                                   │ │
+│  │ • Execution time limits                              │ │
+│  │ • Memory constraints                                 │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                         │                                   │
+│                         ▼                                   │
+│  Layer 4: Semantic Validation                              │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ • AST structure integrity                            │ │
+│  │ • Dangerous node detection                            │ │
+│  │ • Side effect analysis                               │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                         │                                   │
+│                         ▼                                   │
+│  Layer 5: Sandbox Testing                                 │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ • Isolated execution                                 │ │
+│  │ • Timeout enforcement                                │ │
+│  │ • Output capture                                     │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### Checkpoint System
+
+Checkpoints capture a complete system state:
+
+```javascript
+{
+  id: "checkpoint-1713648000000",
+  timestamp: 1713648000000,
+  iteration: 42,
+  version: "1.0.0",
+  state: {
+    iteration: 42,
+    improvements: 15,
+    rollbacks: 2,
+    capabilities: ["ast", "profiler", "evolution"]
+  },
+  modules: {
+    ast: { /* serialized module state */ },
+    profiler: { /* serialized module state */ }
+  },
+  code: "/* current source code */"
+}
+```
+
+### Meta-Learning Strategy
+
+The meta-learning module implements multiple learning strategies:
+
+#### Strategy Selection Algorithm
+
+```javascript
+function selectStrategy(task) {
+  // Step 1: Check for similar past tasks
+  const similarTasks = knowledgeBase.findSimilar(task);
+  
+  if (similarTasks.length > 0 && config.enableTransfer) {
+    // Step 2: Find best-performing strategy for similar tasks
+    const bestStrategy = findBestStrategyForTasks(similarTasks);
+    if (bestStrategy) {
+      metrics.transfers++;
+      return strategies[bestStrategy];
+    }
+  }
+  
+  // Step 3: Fall back to task complexity-based selection
+  const complexity = estimateComplexity(task);
+  
+  switch (complexity) {
+    case 'low':    return strategies.fast;
+    case 'high':   return strategies.thorough;
+    case 'exploratory': return strategies.exploratory;
+    default:       return strategies.default;
+  }
+}
+```
+
+#### Knowledge Transfer
+
+The system can transfer learned knowledge between similar tasks:
+
+1. **Similarity Detection**: Compares task features
+2. **Strategy Extraction**: Identifies successful strategies
+3. **Adaptation**: Modifies strategies for new context
+4. **Validation**: Verifies transferred knowledge effectiveness
+
+### Bootstrap Process
+
+The self-bootstrap ensures the system can initialize without external dependencies:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    BOOTSTRAP PHASES                         │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Phase 1: Self-Analysis                                    │
+│  ├─ Parse own source code                                  │
+│  ├─ Build self-model                                       │
+│  └─ Identify capabilities                                  │
+│                                                             │
+│  Phase 2: Capability Discovery                             │
+│  ├─ Analyze module interfaces                              │
+│  ├─ Discover primitive operations                          │
+│  └─ Map available functions                                │
+│                                                             │
+│  Phase 3: Knowledge Seeding                                │
+│  ├─ Load built-in patterns                                 │
+│  ├─ Initialize optimization heuristics                      │
+│  └─ Pre-populate knowledge base                            │
+│                                                             │
+│  Phase 4: Self-Verification                                │
+│  ├─ Test core module functionality                          │
+│  ├─ Verify self-model consistency                          │
+│  └─ Validate integrity                                      │
+│                                                             │
+│  Phase 5: Initial Optimization                             │
+│  ├─ Apply quick-win optimizations                          │
+│  └─ Optimize based on self-analysis                        │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Quine Replication
+
+The quine engine enables self-replication:
+
+```javascript
+// Simplified quine concept
+const quine = `
+const code = ${JSON.stringify(sourceCode)};
+console.log(code);
+`;
+
+// Full replication package structure
+{
+  manifest: {
+    name: "singularity",
+    version: "1.0.0",
+    files: [
+      { path: "src/core/singularity.js", checksum: "sha256:..." },
+      // ... more files
+    ],
+    totalSize: 150000,
+    generated: 1713648000000
+  },
+  files: {
+    "src/core/singularity.js": "...",
+    // ... actual file contents
+  },
+  bootstrap: "...",
+  metadata: {
+    generated: 1713648000000,
+    parent: "sha256:parent-checksum",
+    version: "1.0.1"
+  }
+}
+```
+
+---
+
+## API Reference
+
+### Singularity Class
+
+#### Constructor
+
+```javascript
+const singularity = new Singularity(config);
+```
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `maxIterations` | `number` | `1000` | Maximum iterations before termination |
+| `safetyLevel` | `string` | `'strict'` | Safety level: `'strict'`, `'moderate'`, `'permissive'` |
+| `enableEvolution` | `boolean` | `true` | Enable evolutionary improvements |
+| `enableMetaLearning` | `boolean` | `true` | Enable meta-learning |
+| `enableSelfReplication` | `boolean` | `true` | Enable self-replication |
+| `checkpointInterval` | `number` | `50` | Iterations between checkpoints |
+
+#### Methods
+
+##### `boot()`
+
+Initializes the SINGULARITY system.
+
+```javascript
+await singularity.boot();
+```
+
+##### `run(cycles)`
+
+Runs the system for specified iterations.
+
+```javascript
+const result = await singularity.run(100);
+console.log(result);
+```
+
+##### `evolve(targetMetric)`
+
+Performs an evolutionary improvement cycle.
+
+```javascript
+const result = await singularity.evolve('performance');
+if (result.success) {
+  console.log('Improvement applied:', result.improvement);
+}
+```
+
+##### `fixBug(bugReport)`
+
+Attempts to fix a reported bug.
+
+```javascript
+const result = await singularity.fixBug({
+  code: 'if (x == null) { return; }',
+  error: 'Use strict equality',
+  description: 'Loose equality detected'
+});
+```
+
+##### `analyzeAndModify(targetCode, modificationGoal)`
+
+Analyzes code and suggests modifications.
+
+```javascript
+const { analysis, modifications } = await singularity.analyzeAndModify(
+  code,
+  'optimize-performance'
+);
+```
+
+##### `replicate()`
+
+Creates a self-replicating copy.
+
+```javascript
+const replica = await singularity.replicate();
+console.log('Checksum:', replica.checksum);
+```
+
+##### `createCheckpoint()`
+
+Creates a system checkpoint.
+
+```javascript
+const checkpoint = await singularity.createCheckpoint();
+```
+
+##### `rollback(checkpoint)`
+
+Rolls back to a previous checkpoint.
+
+```javascript
+await singularity.rollback(checkpoint);
+```
+
+---
+
+## Performance Tuning
+
+### Optimization Strategies
+
+#### 1. Memory Optimization
+
+```javascript
+// Enable aggressive garbage collection
+const singularity = new Singularity({
+  profilerConfig: {
+    enableMemoryTracking: true,
+    gcInterval: 100
+  }
+});
+```
+
+#### 2. Parallel Evolution
+
+```javascript
+// Configure for parallel candidate evaluation
+const engine = new EvolutionEngine(singularity, {
+  evaluationMode: 'parallel',
+  workerCount: 4
+});
+```
+
+#### 3. Caching
+
+The system automatically caches:
+- Parsed ASTs
+- Transformation results
+- Fitness evaluations
+- Meta-learning patterns
+
+### Benchmarking
+
+Run benchmarks to measure system performance:
+
+```javascript
+import { benchmark } from './src/core/benchmark.js';
+
+const results = await benchmark({
+  iterations: 100,
+  warmup: 10,
+  metrics: ['time', 'memory', 'ast-nodes']
+});
+```
+
+---
+
+## Security Considerations
+
+### Threat Model
+
+1. **Self-Modification Abuse**: Preventing harmful code injection
+2. **Resource Exhaustion**: Limiting computational resources
+3. **Data Exfiltration**: Blocking unauthorized data access
+4. **System Compromise**: Maintaining integrity of core systems
+
+### Mitigation Strategies
+
+| Threat | Mitigation | Implementation |
+|--------|------------|----------------|
+| Code injection | AST validation | Pattern matching for dangerous constructs |
+| Memory exhaustion | Resource limits | Checkpoint size limits, memory tracking |
+| Data theft | Sandboxing | Isolated execution environment |
+| Integrity compromise | Checksums | SHA-256 verification of replicated code |
+
+### Audit Trail
+
+All safety-critical operations are logged:
+
+```javascript
+// Audit log entry
+{
+  timestamp: 1713648000000,
+  event: 'validation_passed',
+  data: {
+    changeType: 'code',
+    changeSize: 1024
+  },
+  safetyLevel: 'strict'
+}
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### Memory Usage Growing
+
+**Symptom**: Memory usage increases over time.
+
+**Solution**: 
+1. Enable checkpoint cleanup: `maxCheckpoints: 5`
+2. Increase GC frequency
+3. Reduce population size in evolution engine
+
+#### Evolution Not Converging
+
+**Symptom**: Fitness doesn't improve over generations.
+
+**Solution**:
+1. Increase mutation rate
+2. Adjust selection pressure (tournament size)
+3. Review fitness function implementation
+
+#### Meta-Learning Not Effective
+
+**Symptom**: Learned patterns don't transfer.
+
+**Solution**:
+1. Increase knowledge base size
+2. Adjust similarity threshold
+3. Enable more strategies
+
+### Debug Mode
+
+Enable debug output:
+
+```bash
+DEBUG_SAFETY=1 node src/core/singularity.js
+DEBUG_EVOLUTION=1 node src/core/singularity.js
+DEBUG_META=1 node src/core/singularity.js
+```
+
+---
+
+## Future Enhancements
+
+### Planned Features
+
+#### v1.1 (Q2 2024)
+- [ ] Multi-language support (Python, Rust)
+- [ ] Distributed evolution
+- [ ] Enhanced sandboxing
+- [ ] WebAssembly backend
+
+#### v1.2 (Q3 2024)
+- [ ] Multi-agent collaboration
+- [ ] External feedback integration
+- [ ] Formal verification
+- [ ] Learning from documentation
+
+#### v2.0 (Q4 2024)
+- [ ] Self-hosting compiler
+- [ ] Hardware-level modification
+- [ ] Continuous self-improvement
+- [ ] AGI capabilities benchmark
+
+---
+
+## Citation
+
+If you use SINGULARITY in your research, please cite:
+
+```bibtex
+@software{singularity2024,
+  title = {SINGULARITY: Self-Modifying AI That Rewrites Its Own Code},
+  author = {Singularity AI},
+  year = {2024},
+  version = {1.0.0},
+  url = {https://github.com/moggan1337/Singularity}
+}
+```
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ by SINGULARITY AI</strong>
+  
+  Licensed under MIT License
+</p>
