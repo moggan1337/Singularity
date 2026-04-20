@@ -1,0 +1,32 @@
+{
+  "name": "singularity",
+  "version": "1.0.0",
+  "description": "Self-Modifying AI That Rewrites Its Own Code",
+  "main": "src/core/singularity.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/core/singularity.js",
+    "bootstrap": "node src/bootstrap/bootstrap.js",
+    "test": "node --test tests/*.test.js",
+    "evolve": "node src/evolution/evolution-engine.js",
+    "profile": "node src/profiling/profiler.js",
+    "lint": "eslint src/"
+  },
+  "keywords": [
+    "ai",
+    "self-modifying",
+    "evolutionary",
+    "meta-learning",
+    "ast-manipulation",
+    "self-improvement"
+  ],
+  "author": "Singularity AI",
+  "license": "MIT",
+  "dependencies": {
+    "acorn": "^8.11.3",
+    "acorn-walk": "^8.3.2",
+    "escodegen": "^2.1.0",
+    "estraverse": "^5.3.0",
+    "diff": "^5.2.0"
+  }
+}
