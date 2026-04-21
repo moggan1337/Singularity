@@ -1,4 +1,24 @@
 # SINGULARITY - Self-Modifying AI That Rewrites Its Own Code
+## 🎬 Demo
+![Singularity Demo](demo.gif)
+
+*Self-modifying AI rewriting its own code*
+
+## Screenshots
+| Component | Preview |
+|-----------|---------|
+| AST Analysis | ![ast](screenshots/ast-analysis.png) |
+| Modification View | ![mod](screenshots/modification.png) |
+| Self-Improvement | ![improve](screenshots/self-improve.png) |
+
+## Visual Description
+AST analysis shows code structure being analyzed. Modification view displays before/after code with transformation logic. Self-improvement shows performance gains from rewrites.
+
+---
+
+
+
+[![CI](https://github.com/moggan1337/Singularity/actions/workflows/ci.yml/badge.svg)](https://github.com/moggan1337/Singularity/actions/workflows/ci.yml)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Version-1.0.0-blue.svg" alt="Version">
